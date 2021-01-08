@@ -3,9 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 
+def norm(x,y,z):
+    return np.sqrt(x*x+y*y+z*z)
+
 def E(q, r0, x, y):
     """Return the electric field vector E=(Ex,Ey) due to charge q at r0."""
-    den = np.hypot(x-r0[0], y-r0[1])**3
+    den = norm(x-r0[0], y-r0[1],r0[2])**3
     return q * (x - r0[0]) / den, q * (y - r0[1]) / den
 
 # Grid of x, y points
@@ -16,12 +19,13 @@ X, Y = np.meshgrid(x, y)
 
 # Create a multipole with nq charges of alternating sign, equally spaced
 # on the unit circle.
-nq = 2**int(sys.argv[1])
+#nq = 2**int(sys.argv[1])
 charges = []
 
-for i in np.arange(-1.0,1.0,0.0001):
-    charges.append((-1,(-1,i)))
-    charges.append((1,(1,i)))
+for i in np.arange(-1.0,1.0,0.01):
+    for j in np.arange(-1.0,1.0,0.01):
+        charges.append((-1,(-1,i,j)))
+        charges.append((1,(1,i,j)))
 
 #for i in range(nq):
 #    q = i%2 * 2 - 1
