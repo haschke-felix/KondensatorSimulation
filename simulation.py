@@ -30,6 +30,11 @@ def setupCapacitor():
             charges.append((1,(1,i,j)))
 setupCapacitor()
 
+#charges.append((1,(1,0.5,0)))
+#charges.append((-1,(1,-0.5,0)))
+
+factor = 0.0001
+
 def simulateStep():
     moved_charges = []
     for qp, posp in charges:
@@ -39,22 +44,23 @@ def simulateStep():
                 _, ey, ez = E(q,pos, posp) # ex is not necessary again
                 Ey += ey
                 Ez += ez
-        py = 0.0001*qp*Ey + posp[1]
+        #print("Ey: ",Ey)
+        #print("Ez: ",Ez)
+        py = factor*Ey*qp + posp[1]
         if(py < -1): py = -1
         if(py > 1): py=1
-        pz = 0.0001*qp*Ez + posp[2]
+        pz = factor*Ez*qp + posp[2]
         if(pz < -1): pz = -1
         if(pz > 1): pz=1
         moved_charge = (qp,(posp[0],py,pz))
         moved_charges.append(moved_charge)
     return moved_charges
 
-
 def simulate(n):
     global charges
     for i in range(0,n):
         charges = simulateStep()
-simulate(50)
+simulate(100)
 
 # Grid of x, y points
 nx, ny = 64, 64
@@ -74,7 +80,7 @@ ax = fig.add_subplot(111)
 
 def printDistribution():
     for q, pos in charges:
-        if(charge[0] == 1):
+        if(pos[0] == 1):
             ax.add_artist(Circle(pos[1:3], 0.01, color='#0000aa'))
     
     ax.set_xlabel('$x$')
