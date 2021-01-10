@@ -6,7 +6,10 @@ from enum import Enum
 
 def E_Field(q, r0, p):
     """Return the electric field vector E=(Ex,Ey) due to charge q at r0."""
-    connection = np.subtract(p,r0)
+    cx = p[0] - r0[0]
+    cy = p[1] - r0[1]
+    cz = p[2] - r0[2]
+    connection = np.array((cx,cy,cz))
     den = np.linalg.norm(connection)**3
     return q * connection / den
 
@@ -20,16 +23,14 @@ charges = []
 # setup capacitor
 def setupCapacitor():
     global charges
-    for i in np.arange(-1.0,1.0,0.1):
-        for j in np.arange(-1.0,1.0,0.1):
+    for i in np.linspace(-1.0,1.0,num=10, endpoint=True):
+        for j in np.linspace(-1.0,1.0,num=10,endpoint=True):
             charges.append((-1,(-1,i,j)))
             charges.append((1,(1,i,j)))
 setupCapacitor()
 
 #charges.append((1,(1,0.5,0)))
 #charges.append((-1,(1,-0.5,0)))
-
-factor = 0.0001
 
 class SurfaceState(Enum):
     OnSurface = 1
@@ -39,45 +40,43 @@ class SurfaceState(Enum):
 def surfaceOption(pos):
     if(abs(pos[0]) > 1 or abs(pos[1]) > 1):
         return SurfaceState.Outside
-    if(abs(pos[0]) == 1 or abs(pos[1]) == 1):
+    if(np.isclose(abs(pos[0]),1) or np.isclose(abs(pos[1]),1)):
         return SurfaceState.OnOutline
     return SurfaceState.OnSurface
 
-
-def stretchTo(vect, l):
-    return np.array(vect) * l / np.linalg.norm(vect) 
-
 def validate (pos):
-    if abs(pos[1]) > 1:
+    if (not np.isclose(abs(pos[1]),1)) and abs(pos[1]) > 1:
         pos[1] = -1 if pos[1] < 0 else 1
-    if abs(pos[2]) > 1:
+    if (not np.isclose(abs(pos[2]),1)) and abs(pos[2]) > 1:
         pos[2] = -1 if pos[2] < 0 else 1
     return pos
+
+fraction = 0.5
+
 def simulateStep():
-    print("WHATEVER!!!!")
     global charges
     forces = []
     min_factor = 1
     for qp, posp in charges:
-        min_dist = np.linalg.norm(np.subtract(charges[0],charges[1]))
-        E = 0, 0, 0 # Ex not relevant for movement on the plate
+        min_dist = np.linalg.norm(np.subtract(charges[0][1],charges[1][1]))
+        E = 0, 0, 0
         for q, pos in charges:
-            if(posp != pos): # make sure its not the same charge
+            if (np.array(posp) != np.array(pos)).any(): # make sure its not the same charge
                 min_dist = min(min_dist, np.linalg.norm(np.subtract(pos, posp)))
                 e = E_Field(q,pos, posp) # ex is not necessary again
                 E = np.add(E, e)
         E[0] = 0
         E *= qp
-        min_factor = min(min_factor, 0.5 * min_dist / np.linalg.norm(E))
+        min_factor = min(min_factor, fraction * min_dist / np.linalg.norm(E))
         tmp_pos = np.add(posp, min_factor * E)
         # if currently considered point is outside range, additional steps have to be performed
         if surfaceOption(tmp_pos) == SurfaceState.Outside:
             opt = surfaceOption(posp)
             if opt == SurfaceState.OnOutline:
                 # only consider the tangential field
-                if abs(posp[1]) == 1:
+                if np.isclose(abs(posp[1]),1):
                     E[1] = 0
-                if abs(posp[2]) == 1:
+                if np.isclose(abs(posp[2]),1):
                     E[2] = 0
             if opt == SurfaceState.OnSurface:
                 # only move till on Outline --> figure out intersection
@@ -90,14 +89,14 @@ def simulateStep():
         
         forces.append(E)
     # move the charges according to the outfigured vectors
-    charges = map(lambda pos, move: validate(np.add(pos, move * min_factor)),charges, forces)
+    return list(map(lambda charge, move: (charge[0],validate(np.add(charge[1], move * min_factor))),charges, forces))
             
 
 def simulate(n):
     global charges
     for i in range(0,n):
         charges = simulateStep()
-#simulate(1)
+simulate(200)
 
 # Grid of x, y points
 nx, ny = 64, 64
@@ -106,12 +105,11 @@ y = np.linspace(-2, 2, ny)
 X, Y = np.meshgrid(x, y)
 
 # Electric field vector, E=(Ex, Ey), as separate components
-Ex, Ey = np.zeros((ny, nx)), np.zeros((ny, nx))
-for charge in charges:
-    print(charge)
-    ex, ey, _ = E_Field(*charge, (X, Y, 0))
-    Ex += ex
-    Ey += ey
+#Ex, Ey = np.zeros((ny, nx)), np.zeros((ny, nx))
+#for charge in charges:
+#    ex, ey, _ = E_Field(*charge, (X, Y, 0))
+#    Ex += ex
+#    Ey += ey
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
