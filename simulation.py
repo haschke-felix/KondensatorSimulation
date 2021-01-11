@@ -10,27 +10,23 @@ def E_Field(q, r0, p):
     den = np.linalg.norm(connection)**3
     return q * connection / den
 
-def E_FieldMatrix(q, r0, p):
+def E_FieldMatrix(r0, p):
     """Return the electric field vector E=(Ex,Ey) due to charge q at r0."""
-    connection = np.subtract(p,np.array(r0)[:,np.newaxis,np.newaxis])
+    connection = np.subtract(p,r0[:,np.newaxis,np.newaxis])
     den = np.linalg.norm(connection,axis=0)**3
-    return q * connection / den
+    return r0[0] * connection / den
 
-# Create a multipole with nq charges of alternating sign, equally spaced
-# on the unit circle.
-#nq = 2**int(sys.argv[1])
-
-charges = []
 
 
 # setup capacitor
-def setupCapacitor():
-    global charges
-    for i in np.linspace(-1.0,1.0,num=20, endpoint=True):
-        for j in np.linspace(-1.0,1.0,num=20,endpoint=True):
-            charges.append((-1,(-1,i,j)))
-            charges.append((1,(1,i,j)))
-setupCapacitor()
+clen = 20
+
+cy = np.linspace(-1, 1,num=clen,endpoint=True)
+cz = np.linspace(-1, 1,num=clen,endpoint=True)
+Cy, Cz = np.meshgrid(cy, cz)
+plateplus = np.array((np.full((clen,clen),1),Cy,Cz))
+plateminus = np.array((np.full((clen,clen),-1),Cy,Cz))
+charges = np.concatenate((plateplus,plateminus),axis=1)
 
 #charges.append((1,(1,0.5,0)))
 #charges.append((-1,(1,-0.5,0)))
@@ -101,10 +97,10 @@ def simulate(n):
     for i in range(0,n):
         print("...", i, "...")
         charges = simulateStep()
-#simulate(50)
+#simulate(10)
 
 # Grid of x, y points
-nx, ny = 64, 64
+nx, ny = 512, 512
 x = np.linspace(-2, 2, nx)
 y = np.linspace(-2, 2, ny)
 X, Y = np.meshgrid(x, y)
@@ -113,16 +109,18 @@ gridMatrix = np.array((X,Y,Z))
 
 # Electric field vector, E=(Ex, Ey), as separate components
 E = np.array((np.zeros((ny, nx)), np.zeros((ny, nx)), np.zeros((ny, nx))))
-for charge in charges:
-    E += E_FieldMatrix(*charge, gridMatrix)
+for chargesX in charges.swapaxes(0,2):
+    for charge in chargesX:
+        E += E_FieldMatrix(charge, gridMatrix)
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
 def printDistribution():
-    for q, pos in charges:
-        if(pos[0] == 1):
-            ax.add_artist(Circle(pos[1:3], 0.01, color='#0000aa'))
+    for chargesX in charges.swapaxes(0,2):
+        for charge in chargesX:
+            if(charge[0] == 1):
+                ax.add_artist(Circle(charge[1:3], 0.01, color='#0000aa'))
     
     ax.set_xlabel('$x$')
     ax.set_ylabel('$y$')
@@ -142,8 +140,9 @@ def printStreamPlot():
     
     # Add filled circles for the charges themselves
     charge_colors = {True: '#aa0000', False: '#0000aa'}
-    for q, pos in charges:
-        ax.add_artist(Circle(pos[0:2], 0.01, color=charge_colors[q>0]))
+    for chargesX in charges.swapaxes(0,2):
+        for charge in chargesX:
+            ax.add_artist(Circle(charge[0:2], 0.01, color=charge_colors[charge[0]>0]))
     
     ax.set_xlabel('$x$')
     ax.set_ylabel('$y$')
