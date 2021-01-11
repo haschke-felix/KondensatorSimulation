@@ -6,11 +6,14 @@ from enum import Enum
 
 def E_Field(q, r0, p):
     """Return the electric field vector E=(Ex,Ey) due to charge q at r0."""
-    cx = p[0] - r0[0]
-    cy = p[1] - r0[1]
-    cz = p[2] - r0[2]
-    connection = np.array((cx,cy,cz))
+    connection = np.subtract(p,r0)
     den = np.linalg.norm(connection)**3
+    return q * connection / den
+
+def E_FieldMatrix(q, r0, p):
+    """Return the electric field vector E=(Ex,Ey) due to charge q at r0."""
+    connection = np.subtract(p,np.array(r0)[:,np.newaxis,np.newaxis])
+    den = np.linalg.norm(connection,axis=0)**3
     return q * connection / den
 
 # Create a multipole with nq charges of alternating sign, equally spaced
@@ -23,8 +26,8 @@ charges = []
 # setup capacitor
 def setupCapacitor():
     global charges
-    for i in np.linspace(-1.0,1.0,num=10, endpoint=True):
-        for j in np.linspace(-1.0,1.0,num=10,endpoint=True):
+    for i in np.linspace(-1.0,1.0,num=20, endpoint=True):
+        for j in np.linspace(-1.0,1.0,num=20,endpoint=True):
             charges.append((-1,(-1,i,j)))
             charges.append((1,(1,i,j)))
 setupCapacitor()
@@ -51,7 +54,7 @@ def validate (pos):
         pos[2] = -1 if pos[2] < 0 else 1
     return pos
 
-fraction = 0.5
+fraction = 0.6
 
 def simulateStep():
     global charges
@@ -88,6 +91,7 @@ def simulateStep():
                 min_factor = min(min_factor, min(len_x, len_y) / np.linalg.norm(E))
         
         forces.append(E)
+    print(min_factor)
     # move the charges according to the outfigured vectors
     return list(map(lambda charge, move: (charge[0],validate(np.add(charge[1], move * min_factor))),charges, forces))
             
@@ -95,21 +99,22 @@ def simulateStep():
 def simulate(n):
     global charges
     for i in range(0,n):
+        print("...", i, "...")
         charges = simulateStep()
-simulate(200)
+#simulate(50)
 
 # Grid of x, y points
 nx, ny = 64, 64
 x = np.linspace(-2, 2, nx)
 y = np.linspace(-2, 2, ny)
 X, Y = np.meshgrid(x, y)
+Z = np.zeros((nx,ny))
+gridMatrix = np.array((X,Y,Z))
 
 # Electric field vector, E=(Ex, Ey), as separate components
-#Ex, Ey = np.zeros((ny, nx)), np.zeros((ny, nx))
-#for charge in charges:
-#    ex, ey, _ = E_Field(*charge, (X, Y, 0))
-#    Ex += ex
-#    Ey += ey
+E = np.array((np.zeros((ny, nx)), np.zeros((ny, nx)), np.zeros((ny, nx))))
+for charge in charges:
+    E += E_FieldMatrix(*charge, gridMatrix)
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -131,8 +136,8 @@ def printDistribution():
 
 def printStreamPlot():
     # Plot the streamlines with an appropriate colormap and arrow style
-    color = 2 * np.log(np.hypot(Ex, Ey))
-    ax.streamplot(x, y, Ex, Ey, color=color, linewidth=1, cmap=plt.cm.inferno,
+    color = 2 * np.log(np.hypot(E[0],E[1]))
+    ax.streamplot(x, y, E[0], E[1], color=color, linewidth=1, cmap=plt.cm.inferno,
                 density=3, arrowstyle='->', arrowsize=1.5)
     
     # Add filled circles for the charges themselves
@@ -147,5 +152,5 @@ def printStreamPlot():
     ax.set_aspect('equal')
     plt.show()
 
-printDistribution()
-#printStreamPlot()
+#printDistribution()
+printStreamPlot()
