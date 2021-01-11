@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 from enum import Enum
+from scipy.spatial import distance_matrix
 
 def E_Field(q, r0, p):
     """Return the electric field vector E=(Ex,Ey) due to charge q at r0."""
@@ -19,14 +20,14 @@ def E_FieldMatrix(r0, p):
 
 
 # setup capacitor
-clen = 20
+clen = 5
 
 cy = np.linspace(-1, 1,num=clen,endpoint=True)
 cz = np.linspace(-1, 1,num=clen,endpoint=True)
 Cy, Cz = np.meshgrid(cy, cz)
 plateplus = np.array((np.full((clen,clen),1),Cy,Cz))
 plateminus = np.array((np.full((clen,clen),-1),Cy,Cz))
-charges = np.concatenate((plateplus,plateminus),axis=1)
+charges = np.concatenate((plateplus,plateminus),axis=1).reshape(3,-1).swapaxes(0,1)
 
 #charges.append((1,(1,0.5,0)))
 #charges.append((-1,(1,-0.5,0)))
@@ -53,10 +54,18 @@ def validate (pos):
 fraction = 0.6
 
 def simulateStep():
+    
+    np.fill_diagonal(distance_matrix(charges,charges), np.inf)
     global charges
     forces = []
     min_factor = 1
-    for qp, posp in charges:
+    
+    for charge in charges:
+            connection = np.subtract(p,r0[:,np.newaxis,np.newaxis])
+            distance = np.linalg.norm(connection,axis=0)
+            #return pos[0] * connection / (distance**3)
+
+
         min_dist = np.linalg.norm(np.subtract(charges[0][1],charges[1][1]))
         E = 0, 0, 0
         for q, pos in charges:
@@ -109,17 +118,15 @@ gridMatrix = np.array((X,Y,Z))
 
 # Electric field vector, E=(Ex, Ey), as separate components
 E = np.array((np.zeros((ny, nx)), np.zeros((ny, nx)), np.zeros((ny, nx))))
-for chargesX in charges.swapaxes(0,2):
-    for charge in chargesX:
-        E += E_FieldMatrix(charge, gridMatrix)
+for charge in charges:
+    E += E_FieldMatrix(charge, gridMatrix)
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
 def printDistribution():
-    for chargesX in charges.swapaxes(0,2):
-        for charge in chargesX:
-            if(charge[0] == 1):
+    for charge in charges:
+        if(charge[0] == 1):
                 ax.add_artist(Circle(charge[1:3], 0.01, color='#0000aa'))
     
     ax.set_xlabel('$x$')
@@ -140,9 +147,8 @@ def printStreamPlot():
     
     # Add filled circles for the charges themselves
     charge_colors = {True: '#aa0000', False: '#0000aa'}
-    for chargesX in charges.swapaxes(0,2):
-        for charge in chargesX:
-            ax.add_artist(Circle(charge[0:2], 0.01, color=charge_colors[charge[0]>0]))
+    for charge in charges:
+        ax.add_artist(Circle(charge[0:2], 0.01, color=charge_colors[charge[0]>0]))
     
     ax.set_xlabel('$x$')
     ax.set_ylabel('$y$')
