@@ -20,7 +20,7 @@ def E_FieldMatrix(r0, p):
 
 
 # setup capacitor
-clen = 5
+clen = 10
 
 cy = np.linspace(-1, 1,num=clen,endpoint=True)
 cz = np.linspace(-1, 1,num=clen,endpoint=True)
@@ -51,63 +51,54 @@ def validate (pos):
         pos[2] = -1 if pos[2] < 0 else 1
     return pos
 
-fraction = 0.6
+fraction = 0.4
 
 def simulateStep():
-    
-    dist = distance_matrix(charges,charges)
-    print(dist)
-
     forces = []
     min_factor = 1
-    
-    for charge in charges:
-        connection = np.subtract(p,r0[:,np.newaxis,np.newaxis])
-        distance = np.linalg.norm(connection,axis=0)
-        #return pos[0] * connection / (distance**3)
+    E = np.zeros((len(charges),3))
+    for i in range(0,len(charges)):
+        # evaluate single field
+        charge = charges[i]
+        connections = np.subtract(charges,charge)
+        distances = np.linalg.norm(connections,axis=0)
+        E[i] = - charge[0] * np.ma.masked_invalid(charge[:][0] * connections / (distances**3)).sum()
+        E[i][0] = 0
+        tmpE = E[i]
 
-
-        min_dist = np.linalg.norm(np.subtract(charges[0][1],charges[1][1]))
-        E = 0, 0, 0
-        for q, pos in charges:
-            if (np.array(posp) != np.array(pos)).any(): # make sure its not the same charge
-                min_dist = min(min_dist, np.linalg.norm(np.subtract(pos, posp)))
-                e = E_Field(q,pos, posp) # ex is not necessary again
-                E = np.add(E, e)
-        E[0] = 0
-        E *= qp
-        min_factor = min(min_factor, fraction * min_dist / np.linalg.norm(E))
-        tmp_pos = np.add(posp, min_factor * E)
+        min_dist = np.amin(np.ma.masked_equal(distances, 0))
+                
+        min_factor = min(min_factor, fraction * min_dist / np.linalg.norm(tmpE))
+        tmp_pos = np.add(charge, min_factor * tmpE)
         # if currently considered point is outside range, additional steps have to be performed
         if surfaceOption(tmp_pos) == SurfaceState.Outside:
-            opt = surfaceOption(posp)
+            opt = surfaceOption(charge)
             if opt == SurfaceState.OnOutline:
                 # only consider the tangential field
-                if np.isclose(abs(posp[1]),1):
+                if np.isclose(abs(charge[1]),1):
                     E[1] = 0
-                if np.isclose(abs(posp[2]),1):
+                if np.isclose(abs(charge[2]),1):
                     E[2] = 0
             if opt == SurfaceState.OnSurface:
                 # only move till on Outline --> figure out intersection
                 # handle x / [1] component
-                border = (1 if E[1] > 0 else -1) - posp[1]
-                len_y = np.linalg.norm((border * E[1] / E[2],border))
-                border = (1 if E[2] > 0 else -1) - posp[2]
-                len_x = np.linalg.norm((border * [2] / E[1], border))
-                min_factor = min(min_factor, min(len_x, len_y) / np.linalg.norm(E))
+                border = (1 if tmpE[1] > 0 else -1) - charge[1]
+                len_y = np.linalg.norm((border * tmpE[1] / tmpE[2],border))
+                border = (1 if tmpE[2] > 0 else -1) - charge[2]
+                len_x = np.linalg.norm((border * tmpE[2] / tmpE[1], border))
+                min_factor = min(min_factor, min(len_x, len_y) / np.linalg.norm(tmpE))
         
-        forces.append(E)
     print(min_factor)
     # move the charges according to the outfigured vectors
-    return list(map(lambda charge, move: (charge[0],validate(np.add(charge[1], move * min_factor))),charges, forces))
-            
+
+    return np.apply_along_axis(validate ,1,charges + E * min_factor)
 
 def simulate(n):
     global charges
     for i in range(0,n):
         print("...", i, "...")
         charges = simulateStep()
-#simulate(10)
+simulate(50)
 
 # Grid of x, y points
 nx, ny = 512, 512
