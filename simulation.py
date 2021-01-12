@@ -55,15 +55,16 @@ fraction = 0.6
 
 def simulateStep():
     
-    np.fill_diagonal(distance_matrix(charges,charges), np.inf)
-    global charges
+    dist = distance_matrix(charges,charges)
+    print(dist)
+
     forces = []
     min_factor = 1
     
     for charge in charges:
-            connection = np.subtract(p,r0[:,np.newaxis,np.newaxis])
-            distance = np.linalg.norm(connection,axis=0)
-            #return pos[0] * connection / (distance**3)
+        connection = np.subtract(p,r0[:,np.newaxis,np.newaxis])
+        distance = np.linalg.norm(connection,axis=0)
+        #return pos[0] * connection / (distance**3)
 
 
         min_dist = np.linalg.norm(np.subtract(charges[0][1],charges[1][1]))
