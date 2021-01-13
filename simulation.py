@@ -20,7 +20,7 @@ def E_FieldMatrix(r0, p):
 
 
 # setup capacitor
-clen = 10
+clen = 20
 
 cy = np.linspace(-1, 1,num=clen,endpoint=True)
 cz = np.linspace(-1, 1,num=clen,endpoint=True)
@@ -60,19 +60,20 @@ def simulateStep():
         # evaluate single field
         charge = charges[i]
         connections = np.subtract(charge,charges)
-        print("connections", connections)
+        #print("charge:",charge)
+        #print("connections", connections)
         distances = np.linalg.norm(connections,axis=1)
-        print("distances: ", distances)
-        #print("charges:",(charges.swapaxes(0,1)[0])[:,np.newaxis] * np.ones((32,3)))
-        #print("rest:", connections / (charges.swapaxes()[0] * (distances**3))[:,np.newaxis])
-        E[i] = charge[0] * np.ma.masked_invalid(connections / (charges.swapaxes(0,1)[0] * (distances**3))[:,np.newaxis]).sum()
-        E[i][0] = 0
+        #print("distances: ", distances)
+        #print(connections / (charges.swapaxes(0,1)[0] * (distances**3))[:,np.newaxis])
+        E[i] = charge[0] * np.ma.masked_invalid(connections / (charges.swapaxes(0,1)[0] * (distances**3))[:,np.newaxis]).sum(axis=0)
         tmpE = E[i]
+        #print("E:",np.ma.masked_invalid(connections / (charges.swapaxes(0,1)[0] * (distances**3))[:,np.newaxis]).sum(axis=0))
 
         min_dist = np.amin(np.ma.masked_equal(distances, 0))
                 
         min_factor = min(min_factor, fraction * min_dist / np.linalg.norm(tmpE))
         tmp_pos = np.add(charge, min_factor * tmpE)
+        #print("pos",  charge, "force", tmpE, "tmp:", tmp_pos)
         # if currently considered point is outside range, additional steps have to be performed
         if surfaceOption(tmp_pos) == SurfaceState.Outside:
             opt = surfaceOption(charge)
@@ -101,7 +102,7 @@ def simulate(n):
     for i in range(0,n):
         print("...", i, "...")
         charges = simulateStep()
-simulate(1)
+simulate(50)
 
 # Grid of x, y points
 nx, ny = 64, 64
