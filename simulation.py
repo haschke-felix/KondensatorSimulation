@@ -28,7 +28,9 @@ Cy, Cz = np.meshgrid(cy, cz)
 plateplus = np.array((np.full((clen,clen),1),Cy,Cz))
 plateminus = np.array((np.full((clen,clen),-1),Cy,Cz))
 charges = np.concatenate((plateplus,plateminus),axis=1).reshape(3,-1).swapaxes(0,1)
-
+#print(charges)
+charges  = plateplus.reshape(3,-1).swapaxes(0,1)
+print(charges)
 
 class SurfaceState(Enum):
     OnSurface = 1
@@ -52,16 +54,18 @@ def validate (pos):
 fraction = 0.4
 
 def simulateStep():
-    forces = []
     min_factor = 1
     E = np.zeros((len(charges),3))
     for i in range(0,len(charges)):
         # evaluate single field
         charge = charges[i]
         connections = np.subtract(charge,charges)
-        distances = np.linalg.norm(connections,axis=0)
-        #ch = np.array([charges.swapaxes(1,0)[0],charges.swapaxes(1,0)[0],charges.swapaxes(1,0)[0]]).reshape(200,3)
-        E[i] = - charge[0] * np.ma.masked_invalid(ch * connections / (distances**3)).sum()
+        print("connections", connections)
+        distances = np.linalg.norm(connections,axis=1)
+        print("distances: ", distances)
+        #print("charges:",(charges.swapaxes(0,1)[0])[:,np.newaxis] * np.ones((32,3)))
+        #print("rest:", connections / (charges.swapaxes()[0] * (distances**3))[:,np.newaxis])
+        E[i] = charge[0] * np.ma.masked_invalid(connections / (charges.swapaxes(0,1)[0] * (distances**3))[:,np.newaxis]).sum()
         E[i][0] = 0
         tmpE = E[i]
 
