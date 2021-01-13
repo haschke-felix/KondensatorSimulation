@@ -11,15 +11,14 @@ def setupCapacitor(n):
     plateminus = np.array((np.full((n,n),-1),Cy,Cz))
     return np.concatenate((plateplus,plateminus),axis=1).reshape(3,-1).swapaxes(0,1)
 
-def saveCapacitor(charges, path):
+def save(charges, path):
     assert len(charges.shape) == 2 and charges.shape[1] == 3, "charge model"
-    file = open(path, 'w')
-    np.save(file, charges)
+    np.save(path, charges)
 
-def openCapacitor(path):
-    file = open(path, 'r')
-    charges = np.load(file)
+def load(path):
+    charges = np.load(path)
     assert len(charges.shape) == 2 and charges.shape[1] == 3, "Invalid input file"
+    return charges
 
 def simulate(charges, steps, step=0.4):
     for i in range(0,steps):
