@@ -13,24 +13,11 @@ def E_FieldMatrix(r0, p):
 # Electric field vector, E=(Ex, Ey), as separate components
 
 def _fieldProbe(charges, gridMatrix):
-    try:
-        con = charges.swapaxes(0,1)[:,None,None,:] - gridMatrix[:,:,:,None]
-        den = con[0,:,:,:] *  (np.linalg.norm(con,axis=0)**3)
-        return np.ma.masked_invalid(con / con[0,:,:,:] *  (np.linalg.norm(con,axis=0)**3)).sum(axis=3)
-    except MemoryError:
-        E = np.zeros(gridMatrix.shape)
-        for charge in charges:
-            con = gridMatrix - charge[:,None,None]
-            E  +=  con / (charge[0] * np.linalg.norm(con,axis=0))
-        return E
-    
-
-    
-    #connections = np.subtract(charge,charges)
-    #distances = np.linalg.norm(connections,axis=1)
-    #E[i] = charge[0] * np.ma.masked_invalid(connections / (charges.swapaxes(0,1)[0] * (distances**3))[:,np.newaxis]).sum(axis=0)
-    #E[i][0] = 0 # necessary in order keep charges on plate 
-    #tmpE = E[i]
+    E = np.zeros(gridMatrix.shape)
+    for charge in charges:
+        con = gridMatrix - charge[:,None,None]
+        E  +=  con / (charge[0] * np.linalg.norm(con,axis=0))
+    return E
 
 
 def printDistribution(charges):
