@@ -14,9 +14,11 @@ def E_FieldMatrix(r0, p):
 
 def _fieldProbe(charges, gridMatrix):
     E = np.zeros(gridMatrix.shape)
+    #print(E.shape)
     for charge in charges:
-        con = gridMatrix - charge[:,None,None]
-        E  +=  con / (charge[0] * np.linalg.norm(con,axis=0))
+        #E += E_FieldMatrix(charge, gridMatrix)
+        con = charge[:,None,None] - gridMatrix
+        E  +=  con / ((charge[0] * np.linalg.norm(con,axis=0)**3)[None,:,:])
     return E
 
 
