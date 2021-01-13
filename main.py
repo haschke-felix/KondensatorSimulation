@@ -1,12 +1,14 @@
 import simulation as sim
 import fieldplot as plt
 
-cap = sim.load("cap.npy")
-#cap = sim.setupCapacitor(20)
-#cap = sim.simulate(cap,10)
-print(cap)
+charges = 10
+steps = 1000
 
-#sim.save(cap,"cap.npy")
+cap = sim.setupCapacitor(charges)
+cap = sim.simulate(cap,steps)
 
-#plt.printDistribution(cap)
-plt.printStreamPlot(cap,n=64)
+file = "cap{}x{}-it{}.npy".format(charges, charges, steps)
+
+sim.save(cap, path=file)
+
+plt.printStreamPlot(cap,512)
