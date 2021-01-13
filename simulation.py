@@ -29,14 +29,14 @@ def simulate(charges, steps, step=0.4):
 
 def _simulateStep(charges, step):
     min_factor = 1
-    E = np.zeros((len(charges),3))
+    E = np.zeros(charges.shape)
     for i in range(0,len(charges)):
         # evaluate single field
         charge = charges[i]
         connections = np.subtract(charge,charges)
         distances = np.linalg.norm(connections,axis=1)
         E[i] = charge[0] * np.ma.masked_invalid(connections / (charges.swapaxes(0,1)[0] * (distances**3))[:,np.newaxis]).sum(axis=0)
-        E[i][0] = 0 # necessary for rounding reasons
+        E[i][0] = 0 # necessary in order keep charges on plate 
         tmpE = E[i]
 
         min_dist = np.amin(np.ma.masked_equal(distances, 0))
@@ -65,8 +65,6 @@ def _simulateStep(charges, step):
         
     print(min_factor)
     # move the charges according to the outfigured vectors
-    #charges += E * min_factor
-    #charges = np.apply_along_axis(charges, _validate, 1)
     return np.apply_along_axis(_validate ,1,charges + E * min_factor)
 
 ## collision handling

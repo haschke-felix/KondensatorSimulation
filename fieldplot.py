@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
+from scipy.spatial import distance_matrix
+
 
 def E_FieldMatrix(r0, p):
     """Return the electric field vector E=(Ex,Ey) due to charge q at r0."""
@@ -11,10 +13,24 @@ def E_FieldMatrix(r0, p):
 # Electric field vector, E=(Ex, Ey), as separate components
 
 def _fieldProbe(charges, gridMatrix):
-    E = np.array((np.zeros((512,512)), np.zeros((512,512)), np.zeros((512,512))))
-    for charge in charges:
-        E += E_FieldMatrix(charge, gridMatrix)
-    return E
+    try:
+        con = charges.swapaxes(0,1)[:,None,None,:] - gridMatrix[:,:,:,None]
+        den = con[0,:,:,:] *  (np.linalg.norm(con,axis=0)**3)
+        return np.ma.masked_invalid(con / con[0,:,:,:] *  (np.linalg.norm(con,axis=0)**3)).sum(axis=3)
+    except MemoryError:
+        E = np.zeros(gridMatrix.shape)
+        for charge in charges:
+            con = gridMatrix - charge[:,None,None]
+            E  +=  con / (charge[0] * np.linalg.norm(con,axis=0))
+        return E
+    
+
+    
+    #connections = np.subtract(charge,charges)
+    #distances = np.linalg.norm(connections,axis=1)
+    #E[i] = charge[0] * np.ma.masked_invalid(connections / (charges.swapaxes(0,1)[0] * (distances**3))[:,np.newaxis]).sum(axis=0)
+    #E[i][0] = 0 # necessary in order keep charges on plate 
+    #tmpE = E[i]
 
 
 def printDistribution(charges):
