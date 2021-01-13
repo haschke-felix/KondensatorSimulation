@@ -29,8 +29,6 @@ plateplus = np.array((np.full((clen,clen),1),Cy,Cz))
 plateminus = np.array((np.full((clen,clen),-1),Cy,Cz))
 charges = np.concatenate((plateplus,plateminus),axis=1).reshape(3,-1).swapaxes(0,1)
 
-#charges.append((1,(1,0.5,0)))
-#charges.append((-1,(1,-0.5,0)))
 
 class SurfaceState(Enum):
     OnSurface = 1
@@ -60,9 +58,10 @@ def simulateStep():
     for i in range(0,len(charges)):
         # evaluate single field
         charge = charges[i]
-        connections = np.subtract(charges,charge)
+        connections = np.subtract(charge,charges)
         distances = np.linalg.norm(connections,axis=0)
-        E[i] = - charge[0] * np.ma.masked_invalid(charge[:][0] * connections / (distances**3)).sum()
+        #ch = np.array([charges.swapaxes(1,0)[0],charges.swapaxes(1,0)[0],charges.swapaxes(1,0)[0]]).reshape(200,3)
+        E[i] = - charge[0] * np.ma.masked_invalid(ch * connections / (distances**3)).sum()
         E[i][0] = 0
         tmpE = E[i]
 
@@ -98,10 +97,10 @@ def simulate(n):
     for i in range(0,n):
         print("...", i, "...")
         charges = simulateStep()
-simulate(50)
+simulate(1)
 
 # Grid of x, y points
-nx, ny = 512, 512
+nx, ny = 64, 64
 x = np.linspace(-2, 2, nx)
 y = np.linspace(-2, 2, ny)
 X, Y = np.meshgrid(x, y)
@@ -149,5 +148,5 @@ def printStreamPlot():
     ax.set_aspect('equal')
     plt.show()
 
-#printDistribution()
-printStreamPlot()
+printDistribution()
+#printStreamPlot()
