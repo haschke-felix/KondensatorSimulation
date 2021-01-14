@@ -4,7 +4,7 @@ import threadedSim
 
 if __name__ == '__main__':
 
-    charges = 10
+    charges = 100
     steps = 50
     cap = sim.setupCapacitor(charges)
     #print("created")
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     #print("threaded ready")
     
     
-    cap = sim.simulate(cap,steps)
+    cap = sim.simulateThreaded(cap,steps)
     
     file = "cap{}x{}-it{}.npy".format(charges, charges, steps)
     
