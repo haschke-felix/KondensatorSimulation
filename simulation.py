@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 from enum import Enum
-from scipy.spatial import distance_matrix
+import threadedSim as thr
 
 def setupCapacitor(n):
     cy = np.linspace(-1, 1,num=n,endpoint=True)
@@ -23,6 +23,14 @@ def load(path):
 def simulate(charges, steps, step=0.4):
     for i in range(0,steps):
         charges = _simulateStep(charges, step)
+        print("iteration: ", i)
+    return charges
+
+def simulateThreaded(charges, steps, step=0.4):
+    for i in range(0,steps):
+        t = thr.ThreadedSim(charges, step)
+        charge = t.run()
+        #charges = _simulateStep(charges, step)
         print("iteration: ", i)
     return charges
 
