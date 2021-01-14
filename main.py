@@ -4,8 +4,8 @@ import threadedSim
 
 if __name__ == '__main__':
 
-    charges = 100
-    steps = 50
+    charges = 10
+    steps = 10
     cap = sim.setupCapacitor(charges)
     #print("created")
     #
@@ -20,4 +20,5 @@ if __name__ == '__main__':
     
     sim.save(cap, path=file)
     
-    plt.printStreamPlot(cap,512)
+    #plt.printStreamPlot(cap,512)
+    plt.printDistribution(cap)

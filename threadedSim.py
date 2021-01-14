@@ -4,18 +4,19 @@ import numpy as np
 from enum import Enum
 
 
-class ThreadedSim(object):
-    def __init__(self, charges,step=0.4):
+class SimCore(object):
+    def __init__(self, charges,a,b,step=0.4):
         self.min_factor = 1
-        self.E = np.zeros(charges.shape)
+        self.E = np.zeros((b-a,3))
         self.charges = charges
-        self.n = len(charges)
         self.step = step
+        self.a = a
+        self.b = b
 
-    def _calcCharges(self):
-        while self.n:
-            self.n -= 1
-            self._processSingleCharge(self.n)
+    def run(self):
+        for n in range(self.a,self.b):
+            self.E[n-self.a] = self._processSingleCharge(n)
+            print("core E:", self.E[n-self.a])
 
     def _processSingleCharge(self, i):
                 # evaluate single field
@@ -48,22 +49,44 @@ class ThreadedSim(object):
                 border = (1 if tmpE[2] > 0 else -1) - charge[2]
                 len_x = np.linalg.norm((border * tmpE[2] / tmpE[1], border))
                 self.min_factor = min(self.min_factor, min(len_x, len_y) / np.linalg.norm(tmpE))
-        self.E[i] = tmpE
+        return tmpE
+        #print(E[i])
 
 
-    def run(self):
-        procs = list()
-        n_cpus = psutil.cpu_count()
-        for cpu in range(n_cpus - 1):
-            p = mp.Process(target=self._calcCharges)
-            p.start()
-            procs.append(p)
-        for p in procs:
-            p.join()
-            
-        print(self.min_factor)
-        # move the charges according to the outfigured vectors
-        return np.apply_along_axis(_validate ,1,self.charges + self.E * self.min_factor)
+def simStepThreaded(charges, step=0.4):
+    procs = list()
+    n_cpus = psutil.cpu_count() - 1
+    n = len(charges)
+    n_step = n // n_cpus
+    print(n_step)
+    ranges = []
+    for i in range(n_cpus-1):
+        ranges.append ((n - n_step , n))
+        n -= n_step
+    ranges.append ((0,n))
+
+    cores = []
+    for cpu_range in ranges:
+        core = SimCore(charges, *cpu_range, step=step)
+        cores.append(core)
+        p = mp.Process(target=core.run)
+        p.start()
+        procs.append(p)
+    for p in procs:
+        p.join()
+
+    E = np.empty((0,3))
+    min_factor = 1
+    for core in cores:
+        print(core.min_factor)
+        #print("core array:", core.E)
+        E = np.concatenate((E, core.E))
+        min_factor = min (min_factor, core.min_factor)
+    
+    print(min_factor)
+    #print("E:", E)
+    # move the charges according to the outfigured vectors
+    return np.apply_along_axis(_validate ,1,charges + E * min_factor)
     
 
 ## collision handling
