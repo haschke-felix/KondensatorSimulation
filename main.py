@@ -5,7 +5,7 @@ import sys
 if __name__ == '__main__':
 
     charges = 10
-    steps = 10
+    steps = 100
     print(sys.argv)
     if len(sys.argv) >= 3:
         charges = int(sys.argv[1])

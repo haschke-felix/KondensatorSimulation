@@ -4,19 +4,11 @@ from matplotlib.patches import Circle
 from scipy.spatial import distance_matrix
 
 
-def E_FieldMatrix(r0, p):
-    """Return the electric field vector E=(Ex,Ey) due to charge q at r0."""
-    connection = np.subtract(p,r0[:,np.newaxis,np.newaxis])
-    den = np.linalg.norm(connection,axis=0)**3
-    return r0[0] * connection / den
-
 # Electric field vector, E=(Ex, Ey), as separate components
 
 def _fieldProbe(charges, gridMatrix):
     E = np.zeros(gridMatrix.shape)
-    #print(E.shape)
     for charge in charges:
-        #E += E_FieldMatrix(charge, gridMatrix)
         con = charge[:,None,None] - gridMatrix
         E  +=  con / ((charge[0] * np.linalg.norm(con,axis=0)**3)[None,:,:])
     return E

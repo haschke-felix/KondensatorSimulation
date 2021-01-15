@@ -29,7 +29,7 @@ def simulate(charges, steps, step=0.4):
 def simulateThreaded(charges, steps, step=0.4):
     for i in range(0,steps):
         charges  = thr.simStepThreaded(charges, step)
-        print("iteration: ", i)
+        print("iteration: ", i, end=" ")
     return charges
 
 def _simulateStep(charges, step):
