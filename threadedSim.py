@@ -57,7 +57,7 @@ class SimCore(object):
 
 def simStepThreaded(charges, step=0.4):
     procs = list()
-    n_cpus = psutil.cpu_count() - 1
+    n_cpus = (psutil.cpu_count() * 5) // 4
     n = len(charges)
     n_step = n // n_cpus
     print(n_step)
@@ -90,8 +90,6 @@ def simStepThreaded(charges, step=0.4):
     print(type(resList))
 
     for coreNum, fact, Ep in resList:
-        print(coreNum)
-        print("core array:", coreNum)
         E = np.concatenate((Ep,E))
         min_factor = min (min_factor, fact)
 

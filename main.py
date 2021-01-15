@@ -6,9 +6,10 @@ if __name__ == '__main__':
 
     charges = 10
     steps = 10
-    if len(sys.argv) >= 2:
-        charges = sys.argv[0]
-        steps = sys.argv[1]
+    print(sys.argv)
+    if len(sys.argv) >= 3:
+        charges = int(sys.argv[1])
+        steps = int(sys.argv[2])
     cap = sim.setupCapacitor(charges)
  
     cap = sim.simulateThreaded(cap,steps)
