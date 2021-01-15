@@ -1,11 +1,10 @@
 import simulation as sim
 import fieldplot as plt
-import threadedSim
 
 if __name__ == '__main__':
 
-    charges = 10
-    steps = 10
+    charges = 50
+    steps = 50
     cap = sim.setupCapacitor(charges)
     #print("created")
     #
