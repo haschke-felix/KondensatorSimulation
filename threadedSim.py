@@ -26,7 +26,9 @@ class SimCore(object):
         charge = self.charges[i]
         connections = np.subtract(charge,self.charges)
         distances = np.linalg.norm(connections,axis=1)
-        tmpE = charge[0] * np.ma.masked_invalid(connections / (self.charges.swapaxes(0,1)[0] * (distances**3))[:,np.newaxis]).sum(axis=0)
+
+        distances[i] = 1 # avoid division by zero
+        tmpE = charge[0] * (connections / (self.charges.swapaxes(0,1)[0] * (distances**3))[:,np.newaxis]).sum(axis=0)
         tmpE[0] = 0 # necessary in order keep charges on plate 
 
         min_dist = np.amin(np.ma.masked_equal(distances, 0))
@@ -60,7 +62,7 @@ def simStepThreaded(charges, step=0.4):
     n_cpus = (psutil.cpu_count() * 5) // 4
     n = len(charges)
     n_step = n // n_cpus
-    print(n_step)
+
     ranges = []
     manager = mp.Manager()
     result_dict = manager.dict()
@@ -87,11 +89,12 @@ def simStepThreaded(charges, step=0.4):
     min_factor = 1
     resList = result_dict.values()
     resList.sort(key=lambda x: x[0])
-    print(type(resList))
 
     for coreNum, fact, Ep in resList:
         E = np.concatenate((Ep,E))
         min_factor = min (min_factor, fact)
+
+    print("min_factor:", min_factor)
 
     # move the charges according to the outfigured vectors
     return np.apply_along_axis(_validate ,1,charges + E * min_factor)
