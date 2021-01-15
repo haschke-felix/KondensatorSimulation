@@ -2,21 +2,26 @@ import multiprocessing as mp
 import psutil
 import numpy as np
 from enum import Enum
+import time
+import simulation as sim
+
 
 
 class SimCore(object):
-    def __init__(self, charges,a,b,step=0.4):
+    def __init__(self, charges, coreNum, dict ,a,b,step=0.4):
         self.min_factor = 1
         self.E = np.zeros((b-a,3))
         self.charges = charges
         self.step = step
         self.a = a
         self.b = b
+        self.coreNum = coreNum
+        self.return_dict = dict
 
     def run(self):
         for n in range(self.a,self.b):
             self.E[n-self.a] = self._processSingleCharge(n)
-            print("core E:", self.E[n-self.a])
+        self.return_dict[self.coreNum] = (self.coreNum, self.min_factor, self.E)
 
     def _processSingleCharge(self, i):
                 # evaluate single field
@@ -60,33 +65,42 @@ def simStepThreaded(charges, step=0.4):
     n_step = n // n_cpus
     print(n_step)
     ranges = []
+    manager = mp.Manager()
+    result_dict = manager.dict()
+    
     for i in range(n_cpus-1):
-        ranges.append ((n - n_step , n))
+        ranges.append ((i, result_dict, n - n_step , n))
         n -= n_step
-    ranges.append ((0,n))
+    ranges.append ((n_cpus,0,n))
 
-    cores = []
+
+    jobs = []
     for cpu_range in ranges:
         core = SimCore(charges, *cpu_range, step=step)
-        cores.append(core)
+        jobs.append(core)
         p = mp.Process(target=core.run)
         p.start()
         procs.append(p)
     for p in procs:
         p.join()
+    
 
+    
     E = np.empty((0,3))
     min_factor = 1
-    for core in cores:
+    for job in jobs:
         print(core.min_factor)
         #print("core array:", core.E)
-        E = np.concatenate((E, core.E))
-        min_factor = min (min_factor, core.min_factor)
+        E = np.concatenate((E, job.E))
+        min_factor = min (min_factor, job.min_factor)
     
-    print(min_factor)
+    for coreNum, fact, Ep in  result_dict.values():
+        print(Ep)
+
+    #print(min_factor)
     #print("E:", E)
     # move the charges according to the outfigured vectors
-    return np.apply_along_axis(_validate ,1,charges + E * min_factor)
+    #return np.apply_along_axis(_validate ,1,charges + E * min_factor)
     
 
 ## collision handling
@@ -108,3 +122,25 @@ def _validate (pos):
     if (not np.isclose(abs(pos[2]),1)) and abs(pos[2]) > 1:
         pos[2] = -1 if pos[2] < 0 else 1
     return pos
+
+
+ 
+#def fun(ele):
+#    return ele**2
+# 
+#def simulateMultiProcessed():
+#    input_list = [1000]*1000
+#    n = 250
+#    start_time = time.time()
+#    pool = mp.Pool(4)
+#    result = pool.map(func=fun, iterable=input_list, chunksize=n)
+#    pool.close()
+#    pool.join()
+#    end_time = time.time()
+#    print(end_time-start_time)
+#    print(type(result))
+#    print(result)
+
+if __name__ == "__main__":
+    cap =  sim.setupCapacitor(10)
+    simStepThreaded(cap)
