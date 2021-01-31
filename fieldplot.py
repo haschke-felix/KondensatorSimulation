@@ -60,15 +60,32 @@ def printStreamPlot(charges,n=512):
     plt.show()
 
 
-def strengthInMiddlePlot(charges, res=1000):
-    x = np.linspace(-5,5,res)
+def strengthInMiddlePlot(charges, res=1000, range=5):
+    x = np.linspace(-range,range,res)
     points = np.array((x,np.zeros(res),np.zeros(res)))
-
+    
 
     E = np.zeros(points.shape)
     for charge in charges:
         con = charge[:,None] - points
-        E  +=  con / ((charge[0] * np.linalg.norm(con,axis=0)**3)[None,:])
+        E  +=  con / ((charge[0]  * np.linalg.norm(con,axis=0)**3)[None,:])
     print(E[0])
-    plt.plot(x,E[0], '-', color='black')
+
+    E /= E[0].max()
+    E *= 100
+
+    fig = plt.figure()
+
+    ax = fig.add_subplot(111)
+    ax.plot(x,E[0], '-', color='black')
+    ax.set_xlabel("$x_1 \\, (m)$")
+    ax.set_ylabel("$E_0 \\, (\\%)$")
+    
+    x1 = np.linspace(-range, range, 2)
+    y1 = np.zeros(x1.shape)
+    
+    ax.plot(x1,y1) 
+
+    #plt.plot(x1, y1)
+
     plt.show()
