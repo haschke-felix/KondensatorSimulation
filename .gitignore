@@ -5,3 +5,4 @@
 *.npy
 *.pyc
 *test*
+*__pycache__*

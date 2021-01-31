@@ -58,3 +58,17 @@ def printStreamPlot(charges,n=512):
     ax.set_ylim(-2,2)
     ax.set_aspect('equal')
     plt.show()
+
+
+def strengthInMiddlePlot(charges, res=1000):
+    x = np.linspace(-5,5,res)
+    points = np.array((x,np.zeros(res),np.zeros(res)))
+
+
+    E = np.zeros(points.shape)
+    for charge in charges:
+        con = charge[:,None] - points
+        E  +=  con / ((charge[0] * np.linalg.norm(con,axis=0)**3)[None,:])
+    print(E[0])
+    plt.plot(x,E[0], '-', color='black')
+    plt.show()
