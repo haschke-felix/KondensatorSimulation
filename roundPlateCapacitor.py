@@ -9,7 +9,7 @@ R = 1
 
 def simulateThreaded(charges, steps, step=0.4):
     for i in range(0,steps):
-        thr.simStepThreaded(charges, step)
+        simStepThreaded(charges, step)
         print("iteration: ", i, end=" ")
     return charges
 
@@ -74,7 +74,6 @@ class SimCore(object):
                     max_dist = np.linalg.norm((charge-tmp)[1:3])
                     real_dist = np.linalg.norm(tmpE[1:3])
                     self.min_factor = min (self.min_factor, max_dist / real_dist)
-        
         return tmpE
 
 def mapToOutline(p, E):
@@ -128,7 +127,6 @@ def simStepThreaded(charges, step=0.4):
     for i in range (len(charges)):
         charges[i] = _validate(charges[i],E[i])
     #return np.apply_along_axis(_validate ,1,charges + E * min_factor)
-    
 
 ## collision handling
 class _SurfaceState(Enum):
@@ -138,7 +136,7 @@ class _SurfaceState(Enum):
 
 def _surfaceOption(pos):
     # determine whether the position is inside the circle or not
-    r= np.hypot(pos[0],pos[1])
+    r= np.hypot(pos[1],pos[2])
     if r > R:
         return _SurfaceState.Outside
     if np.isclose(r,R):
@@ -146,15 +144,22 @@ def _surfaceOption(pos):
     return _SurfaceState.OnSurface
 
 def _validate (pos, new_pos):
+    # store the charge
+    charge = new_pos[0]
     #outside
-    if np.hypot(new_pos[1], new_pos[2]) > R :
-        warnings.warn("A position outside the place has been encountered, This case should not happen")
+    
+    hyp = np.hypot(new_pos[1], new_pos[2])
+    if np.hypot(new_pos[1], new_pos[2]) > R and not np.isclose(hyp,R):
+        print("A position outside the place has been encountered, This case should not occur")
+        print(np.hypot(new_pos[1], new_pos[2]),pos,new_pos)
         new_pos /= np.linalg.norm(new_pos[1:3]) * R
     
     # special case: if the charge already was on the outline
     # then set to outline also if currently not on outline
-    if _surfaceOption(pos) == _surfaceState.OnOutline:
+    if _surfaceOption(pos) == _SurfaceState.OnOutline:
         new_pos /= np.linalg.norm(new_pos[1:3]) * R
+    
+    new_pos[0] = charge
 
     return new_pos
 
