@@ -61,8 +61,8 @@ class SimCore(object):
                 # figure out the angle between E and the charge position
 
                 # The field vector points somewhere between the both sides of the tangent:
-                if np.cos(np.dot(charge[1:3], E[1:3]) > 0):
-                    target_pos = E[1:3] / np.linalg.norm(E[1:3]) * R
+                if np.cos(np.dot(charge[1:3], tmpE[1:3]) > 0):
+                    target_pos = tmpE[1:3] / np.linalg.norm(tmpE[1:3]) * R
                     tmpE = target_pos[1:3] - charge[1:3]
                     # not considering min_factor at this point
 
