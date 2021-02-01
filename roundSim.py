@@ -5,7 +5,7 @@ import roundPlateCapacitor as roundCap
 
 if __name__ == '__main__':
 
-    charges = 0.1
+    charges = 0.05
     steps =1000
     print(sys.argv)
     if len(sys.argv) >= 3:
@@ -15,10 +15,13 @@ if __name__ == '__main__':
     cap = roundCap.setupCapacitor(charges)
     #cap = sim.load("cap50x50-it1000.npy")
 
-    cap = roundCap.simulateThreaded(cap,steps,step=0.4)
-    
-    file = "roundCap{}x{}-it{}.npy".format(charges, charges, steps)
-    
-    sim.save(cap, path=file)
+    #cap = roundCap.simulateThreaded(cap,steps,step=2)
+    for i in range(1,11):
+        cap = roundCap.simulateThreaded(cap,100*i,step=2)
+        file = "roundCap{}x{}-it{}.npy".format(charges, i*100)
+        sim.save(cap, path=file)
+    if(False):
+        file = "roundCap{}x{}-it{}.npy".format(charges, charges, steps)
+        sim.save(cap, path=file)
     #plt.printStreamPlot(cap,128)
     plt.printDistribution(cap)
