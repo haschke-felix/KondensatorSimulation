@@ -71,6 +71,7 @@ def strengthInMiddlePlot(charges, res=1000, range=5):
         E  +=  con / ((charge[0]  * np.linalg.norm(con,axis=0)**3)[None,:])
     print(E[0])
 
+    # turn into percentage value
     E /= E[0].max()
     E *= 100
 
@@ -85,7 +86,5 @@ def strengthInMiddlePlot(charges, res=1000, range=5):
     y1 = np.zeros(x1.shape)
     
     ax.plot(x1,y1) 
-
-    #plt.plot(x1, y1)
 
     plt.show()
