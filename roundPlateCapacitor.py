@@ -63,7 +63,7 @@ class SimCore(object):
                 # The field vector points somewhere between the both sides of the tangent:
                 if np.cos(np.dot(charge[1:3], tmpE[1:3]) > 0):
                     target_pos = tmpE[1:3] / np.linalg.norm(tmpE[1:3]) * R
-                    tmpE = target_pos[1:3] - charge[1:3]
+                    tmpE[1:3] = target_pos[1:3] - charge[1:3]
                     # not considering min_factor at this point
 
                 # The field vector intersects with the circle again (opposite side)
@@ -105,6 +105,7 @@ def simStepThreaded(charges, step=0.4):
         p = mp.Process(target=core.run, args=(cpu_range[0],result_dict))
         p.start()
         procs.append(p)
+
     for p in procs:
         p.join()
     
@@ -114,7 +115,6 @@ def simStepThreaded(charges, step=0.4):
     min_factor = 1
     resList = result_dict.values()
     resList.sort(key=lambda x: x[0])
-
     for coreNum, fact, Ep in resList:
         E = np.concatenate((Ep,E))
         min_factor = min (min_factor, fact)
