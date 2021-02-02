@@ -193,3 +193,19 @@ def setupCapacitor(step=0.2):
             charges_minus[i] = np.array((-1, r*np.sin(alpha), r*np.cos(alpha)))
             i += 1
     return np.concatenate((charges_plus, charges_minus))
+
+def setupCapacitorAllChargesOnOutline(step=0.2):
+    # placing the charges on the outer ring only
+
+    total_num = 3600
+    charges_plus = np.zeros((total_num, 3))
+    charges_minus = np.zeros((total_num, 3))
+
+    i = 0
+    # generate single charges
+    for _ in range(int(total_num)):
+        alpha = 2 * np.pi * i / total_num
+        charges_plus[i] = np.array((1, R*np.sin(alpha), R*np.cos(alpha)))
+        charges_minus[i] = np.array((-1, R*np.sin(alpha), R*np.cos(alpha)))
+        i += 1
+    return np.concatenate((charges_plus, charges_minus))
