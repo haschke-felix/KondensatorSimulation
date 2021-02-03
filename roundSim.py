@@ -27,7 +27,7 @@ if __name__ == '__main__':
     #cap = sim.load("cap50x50-it1000.npy")
 
     #cap = roundCap.simulateThreaded(cap,steps,step=2)
-    for i in np.linspace(1,int (steps / 100) + 1):
+    for i in range(1,int (steps / 100) + 1):
         cap = roundCap.simulateThreaded(cap,100,step=step)
         file = "roundCap{}x{}-it{}step{}.npy".format(charges, charges, i*100,step)
         sim.save(cap, path=file)
