@@ -61,9 +61,12 @@ class SimCore(object):
                 # figure out the angle between E and the charge position
 
                 # The field vector points somewhere between the both sides of the tangent:
-                if np.cos(np.dot(charge[1:3], tmpE[1:3]) > 0):
+                dot_product = np.dot(charge[1:3], tmpE[1:3])
+                if dot_product > 0:
+                    E_parallel = tmpE[1:3] - charge[1:3] * dot_product / (np.linalg.norm(charge[1:3]))
                     target_pos = tmpE[1:3] / np.linalg.norm(tmpE[1:3]) * R
-                    tmpE[1:3] = target_pos[1:3] - charge[1:3]
+
+                    tmpE[1:3] = target_pos
                     # not considering min_factor at this point
 
                 # The field vector intersects with the circle again (opposite side)
@@ -122,7 +125,7 @@ def simStepThreaded(charges, step=0.4):
     print("min_factor:", min_factor)
 
     # move the charges according to the outfigured vectors
-    E *= min_factor
+    E *= min_factor 
     E += charges
     for i in range (len(charges)):
         charges[i] = _validate(charges[i],E[i])
@@ -150,7 +153,7 @@ def _validate (pos, new_pos):
     
     hyp = np.hypot(new_pos[1], new_pos[2])
     if np.hypot(new_pos[1], new_pos[2]) > R and not np.isclose(hyp,R):
-        print("A position outside the place has been encountered, This case should not occur")
+        print("A position outside the circle has been encountered, This case should not occur")
         print(np.hypot(new_pos[1], new_pos[2]),pos,new_pos)
         new_pos /= np.linalg.norm(new_pos[1:3]) * R
     
@@ -197,7 +200,7 @@ def setupCapacitor(step=0.2):
 def setupCapacitorAllChargesOnOutline(step=0.2):
     # placing the charges on the outer ring only
 
-    total_num = 3600
+    total_num = 360
     charges_plus = np.zeros((total_num, 3))
     charges_minus = np.zeros((total_num, 3))
 
