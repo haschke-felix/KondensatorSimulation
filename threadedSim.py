@@ -20,7 +20,7 @@ class SimCore(object):
         for n in range(self.a,self.b):
             self.E[n-self.a] = self._processSingleCharge(n)
         dict[coreNum] = (coreNum, self.min_factor, self.E)
-
+ 
     def _processSingleCharge(self, i):
                 # evaluate single field
         charge = self.charges[i]
