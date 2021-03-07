@@ -55,7 +55,7 @@ class SimCore(object):
                 tmpE = mapToOutline(charge, tmpE)
     
                 # updating min factor
-                self.min_factor = min(self.min_factor, np.linalg.norm(tmpE))
+                #self.min_factor = min(self.min_factor, np.linalg.norm(tmpE))
             
             if pre_opt == _SurfaceState.OnOutline:
                 # figure out the angle between E and the charge position
@@ -76,7 +76,8 @@ class SimCore(object):
                     tmp = mapToOutline(charge, tmpE)
                     max_dist = np.linalg.norm((charge-tmp)[1:3])
                     real_dist = np.linalg.norm(tmpE[1:3])
-                    self.min_factor = min (self.min_factor, max_dist / real_dist)
+                    print("encountered force putting the charge from outside through the circle outside!")
+                    #self.min_factor = min (self.min_factor, max_dist / real_dist)
         return tmpE
 
 def mapToOutline(p, E):
