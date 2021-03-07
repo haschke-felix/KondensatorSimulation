@@ -14,9 +14,9 @@ def simulateThreaded(cap,steps, step=0.4, dist=1, savepath="", saveInterval=100)
         simStepThreaded(cap, step)
         print("iteration: ", i, end=" ")
         if (len(savepath) > 0) and (i % saveInterval == 0):
-            sim.save(cap, path=(path + "steps/$cap-{}.npy".format(i)))
+            sim.save(cap, path=(path + "/steps/$cap-{}.npy".format(i)))
     if len(savepath) > 0:
-        sim.save(cap, path=(path + "cap.npy"))
+        sim.save(cap, path=(path + "/cap.npy"))
 
     return cap
 
