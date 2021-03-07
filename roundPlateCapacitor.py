@@ -4,11 +4,13 @@ import numpy as np
 from enum import Enum
 import time
 import simulation as sim
+import os
 
 R = 1
 
 def simulateThreaded(cap,steps, step=0.4, dist=1, savepath="", saveInterval=100):
     path = savepath + "/round-{}-step:{}-dist:{}".format(len(cap), step, dist)
+    os.mkdir(path)
     count = 0
     for i in range(0,steps):
         simStepThreaded(cap, step)
