@@ -26,7 +26,11 @@ if __name__ == '__main__':
         step = float(sys.argv[3]) 
     except(IndexError): 
         pass
-    
+    try:
+        dist = float(sys.argv[4]) 
+    except(IndexError): 
+        pass
+
     cap = roundCap.setupCapacitor(charges, dist)
     #cap = sim.load("cap50x50-it1000.npy")
 
