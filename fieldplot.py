@@ -127,18 +127,20 @@ def strengthInMiddlePlot(charges, res=1000, range=5):
 
     plt.show()
 
-def kernel(r,x,sigma):
-    return np.exp(-((r-x)/sigma)**2) / r
+def kernel(r,x,h):
+    return np.exp(-((r-x)/h)**2) / r
+
 
 
 # only properly working for round cap
-def kernelDensityPlot(charges,res=1000,sigma=1/40):
+def kernelDensityCurve(charges,res=5000,h=1/40):
     # figure all radiuses
     positivePlate = charges[charges[:,0] > 0]
     r = np.hypot(positivePlate[:,1],positivePlate[:,2])
-    #r = np.concatenate((r, -1*r))
 
-    x = np.linspace(0,1,res)
+    max_r = np.round(np.max(r),1)
+    x = np.linspace(-5,5,res)
+
     y = np.zeros(res)
         
     i = 0
@@ -146,25 +148,42 @@ def kernelDensityPlot(charges,res=1000,sigma=1/40):
 
     for xval in x:
 
-        y[i] = kernel(r, np.full((r.shape),xval),sigma).sum()
+        y[i] = kernel(r, np.full((r.shape),xval),h).sum()
         integral += y[i]
         i += 1
-    y /= (integral / res)
+    y /= (integral / res * 10)
+
+    return x,y
+
+# only properly working for round cap
+def kernelDensityPlot(charges,res=1000,h=1/40):
     
+    x,y = kernelDensityCurve(charges,res,h=h)
+
     fig = plt.figure()
 
     ax = fig.add_subplot(111)
     ax.plot(x,y, '-', color='black')
-    #ax.set_xlabel("$x_1 \\, (m)$")
-    #ax.set_ylabel("$E_0 \\, (\\%)$")
-    
-    #x1 = np.linspace(-range, range, 2)
-    #y1 = np.zeros(x1.shape)
-    
-    #ax.plot(x1,y1) 
 
+    ax.set_xlabel("$r$")
+    ax.set_ylabel("$\~\sigma(r)$")
+    ax.set_xlim(0,1)
+    
     plt.show()
 
+def compareDensity(cap1, cap2, h1=1/40, h2=1/40,label1="",label2=""):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    ax.plot(*kernelDensityCurve(cap1,h=h1), '-', color='black', label=label1)
+    ax.plot(*kernelDensityCurve(cap2,h=h2), '-', color='red', label=label2)
+    
+    ax.set_xlabel("$r$")
+    ax.set_ylabel("$\~\sigma(r)$")
+    ax.set_xlim(0,1)
+    
+    plt.legend()
+    plt.show()
 
 # only properly working for round cap
 def chargeOccurancePlot(charges,res=10):
