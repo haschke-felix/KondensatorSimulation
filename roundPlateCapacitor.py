@@ -36,6 +36,7 @@ class SimCore(object):
 
         distances[i] = 1 # avoid division by zero
         tmpE = charge[0] * (connections / (self.charges.swapaxes(0,1)[0] * (distances**3))[:,np.newaxis]).sum(axis=0)
+        tmpE *= 100
         tmpE[0] = 0 # necessary in order keep charges on plate 
 
         # check minimum move distance
@@ -176,7 +177,7 @@ def solvePoly2(a, b, c):
     return solution
 
 
-def setupCapacitor(step=0.2):
+def setupCapacitor(step=0.2, dist=1):
     # marking rings with the specified distance
     # on these rings, try to make a distance of the distance
     circle_radius = np.arange(start=step, stop=R,step=step)
@@ -193,8 +194,8 @@ def setupCapacitor(step=0.2):
         # generate single charges
         for _ in range(int(n)):
             alpha = 2 * np.pi * i / n
-            charges_plus[i] = np.array((1, r*np.sin(alpha), r*np.cos(alpha)))
-            charges_minus[i] = np.array((-1, r*np.sin(alpha), r*np.cos(alpha)))
+            charges_plus[i] = np.array((dist, r*np.sin(alpha), r*np.cos(alpha)))
+            charges_minus[i] = np.array((-dist, r*np.sin(alpha), r*np.cos(alpha)))
             i += 1
     return np.concatenate((charges_plus, charges_minus))
 

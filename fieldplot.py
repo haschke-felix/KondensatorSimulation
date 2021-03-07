@@ -20,7 +20,7 @@ def printDistribution(charges):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     for charge in charges:
-        if(charge[0] == 1):
+        if(charge[0] > 0):
                 ax.add_artist(Circle(charge[1:3], 0.01, color='#0000aa'))
     
     #ax.set_xlabel('$x$')
