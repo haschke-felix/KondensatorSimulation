@@ -2,6 +2,8 @@ import sys
 import numpy as np
 from enum import Enum
 import threadedSim as thr
+import os
+
 
 def setupCapacitor(n):
     cy = np.linspace(-1, 1,num=n,endpoint=True)
@@ -13,6 +15,13 @@ def setupCapacitor(n):
 
 def save(charges, path):
     assert len(charges.shape) == 2 and charges.shape[1] == 3, "charge model"
+    
+    directory = os.path.dirname(path)
+    try:
+        os.stat(directory)
+    except:
+        os.mkdir(directory)     
+    
     np.save(path, charges)
 
 def load(path):

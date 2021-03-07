@@ -7,11 +7,18 @@ import simulation as sim
 
 R = 1
 
-def simulateThreaded(charges, steps, step=0.4):
+def simulateThreaded(cap,steps, step=0.4, dist=1, savepath="", saveInterval=100):
+    path = savepath + "/round-{}-step:{}-dist:{}".format(len(cap), step, dist)
+    count = 0
     for i in range(0,steps):
-        simStepThreaded(charges, step)
+        simStepThreaded(cap, step)
         print("iteration: ", i, end=" ")
-    return charges
+        if (len(savepath) > 0) and (i % saveInterval == 0):
+            sim.save(cap, path=(path + "steps/$cap-{}.npy".format(i)))
+    if len(savepath) > 0:
+        sim.save(cap, path=(path + "cap.npy"))
+
+    return cap
 
 
 class SimCore(object):
