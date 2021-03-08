@@ -128,7 +128,7 @@ def strengthInMiddlePlot(charges, res=1000, range=5):
     plt.show()
 
 def kernel(r,x,h):
-    return np.exp(-((r-x)/h)**2) / r
+    return (1 / np.sqrt(2*np.pi)) * np.exp(-(((r-x)/h)**2) / 2) / (r * h)
 
 
 
@@ -139,21 +139,22 @@ def kernelDensityCurve(charges,res=5000,h=1/40):
     r = np.hypot(positivePlate[:,1],positivePlate[:,2])
 
     max_r = np.round(np.max(r),1)
-    x = np.linspace(-5,5,res)
+    x = np.linspace(0,1,res)
 
     y = np.zeros(res)
         
     i = 0
     integral = 0
-
+        
     for xval in x:
-
         y[i] = kernel(r, np.full((r.shape),xval),h).sum()
         integral += y[i]
         i += 1
-    y /= (integral / res * 10)
+    integral = (1/r).sum()
+    y /= (integral)
 
     return x,y
+
 
 # only properly working for round cap
 def kernelDensityPlot(charges,res=1000,h=1/40):
