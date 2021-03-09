@@ -4,13 +4,13 @@ import fieldplot as fplot
 import roundPlateCapacitor as roundCap
 import numpy as np
 
-widths = np.array([0.1, 0.2,0.3, 0.5,10000.0])
-colors = [('-', 'green'),('-', 'red'),('-', 'blue'),('-', 'orange')]
+widths = np.array([0.05, 0.3,0.5,1.0])
+colors = [('-', 'green'),('-', 'red'),('-', 'blue'),('-', 'orange'), ('-', 'black')]
 
 caps = []
-h = 1/22
+h = 1/80
 for w in widths:
-    path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.05/Breite_{}/cap.npy".format(w)
+    path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.02/Breite_{}/cap.npy".format(w)
     print(path) 
     cap = sim.load(path)
     caps.append(fplot.kernelDensityCurve(cap,h=h))
@@ -22,8 +22,8 @@ for i in range(0, min(len(colors),len(caps))):
     ax.plot(*caps[i], colors[i][0], color=colors[i][1], label="Abstand: {}".format(widths[i]*2))   
 
 # limit curve
-inf = sim.load("/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.05/Breite_10000.0/cap.npy")
-ax.plot(*fplot.kernelDensityCurve(inf,h=h), '--', color='black', label="Abstand: ꝏ")
+#inf = sim.load("/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.05/Breite_10000.0/cap.npy")
+#ax.plot(*fplot.kernelDensityCurve(inf,h=h), '--', color='black', label="Abstand: ꝏ")
 
 # intersection
 def intersections(x, f, g):
