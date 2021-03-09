@@ -3,6 +3,11 @@ import simulation as sim
 import fieldplot as fplot
 import roundPlateCapacitor as roundCap
 import easygui
+import sys
+
+resolution = 50
+if(len(sys.argv) > 1):
+    resolution = int(sys.argv[1])    
 
 
 def _fieldProbe(charges, gridMatrix):
@@ -49,4 +54,4 @@ path = easygui.fileopenbox(default="/home/felix/Documents/Schule/Physik/Facharbe
 #path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.02/Breite_1.0/cap.npy"
 cap = sim.load(path)
 
-distributionAnalysis(cap,50,10)
+distributionAnalysis(cap,resolution,10)
