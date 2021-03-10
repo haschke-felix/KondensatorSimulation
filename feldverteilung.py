@@ -11,7 +11,8 @@ if(len(sys.argv) > 1):
 
 
 def _fieldProbe(charges, gridMatrix):
-    E = np.zeros(gridMatrix.shape)
+    con = np.subtract(gridMatrix[:,:,:,:,None], charges[:,None,None,None,:],axis=0)
+    E = con / (charges[:,])
     for charge in charges:
         con =  gridMatrix - charge[:,None,None,None]
         E  +=  con / ((charge[0] * np.linalg.norm(con,axis=0)**3)[None,:,:,:])
