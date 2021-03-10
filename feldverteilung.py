@@ -5,9 +5,12 @@ import roundPlateCapacitor as roundCap
 import easygui
 import sys
 
+path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.05/Breite_1.0/cap.npy"
 resolution = 60
 if(len(sys.argv) > 1):
-    resolution = int(sys.argv[1])    
+    resolution = int(sys.argv[1])
+if(len(sys.argv) > 2):
+    path = sys.argv[2]
 
 
 def _fieldProbe(charges, gridMatrix):
@@ -58,7 +61,7 @@ def distributionAnalysis(charges,n=512, r=2, dist=1):
 
 
 
-path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.05/Breite_1.0/cap.npy"
+#path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.05/Breite_1.0/cap.npy"
 #path = easygui.fileopenbox(default="/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund")
 #path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.02/Breite_1.0/cap.npy"
 cap = sim.load(path)
