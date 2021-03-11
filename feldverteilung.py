@@ -3,10 +3,11 @@ import simulation as sim
 import fieldplot as fplot
 import roundPlateCapacitor as roundCap
 import easygui
+import matplotlib.pyplot as plt
 import sys
 
 path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.05/Breite_1.0/cap.npy"
-resolution = 60
+resolution = 40
 if(len(sys.argv) > 1):
     resolution = int(sys.argv[1])
 if(len(sys.argv) > 2):
@@ -66,4 +67,25 @@ def distributionAnalysis(charges,n=512, r=2, dist=1):
 #path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.02/Breite_1.0/cap.npy"
 cap = sim.load(path)
 
-distributionAnalysis(cap,n=resolution,r=10, dist=2)
+distributionAnalysis(cap,n=resolution,r=4, dist=2)
+
+def oneAxisDistribution():
+    space = np.linspace(-10,10, 10000)
+    spaceGrid = np.array([space, np.zeros(space.shape), np.zeros(space.shape)])
+    
+    charges = cap.swapaxes(0,1)
+    
+    print("spaceGrid", spaceGrid.shape)
+    con = np.subtract(spaceGrid[:,:,None], charges[:,None,:])
+    print("con", con.shape)
+    E = con / (charges[0, :] * (np.linalg.norm(con,axis=0)**3))
+    E = np.sum(E,axis=2)
+    print("E", E.shape)
+    normE = np.linalg.norm(E, axis=0)
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    
+    ax.plot(space, normE, '-')
+    
+    plt.show()
