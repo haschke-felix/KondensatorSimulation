@@ -6,68 +6,70 @@ import easygui
 import matplotlib.pyplot as plt
 import sys
 
-path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.05/Breite_1.0/cap.npy"
-resolution = 40
-if(len(sys.argv) > 1):
+path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.05/Breite_0.01/cap.npy"
+resolution = 200
+width = 1.0
+try:
     resolution = int(sys.argv[1])
-if(len(sys.argv) > 2):
-    path = sys.argv[2]
+except:
+    pass
+try:
+    width = sys.argv[2]
+except:
+    pass
+try:
+    path = sys.argv[3]
+except:
+    pass
 
-
-def _fieldProbe(charges, gridMatrix):
-    print("gridMatrix", gridMatrix.shape)
-    charges = charges.swapaxes(0,1)
-    print("charges", charges.shape)
-    con = np.subtract(gridMatrix[:,:,:,:,None], charges[:,None,None,None,:])
-    print("con", con.shape)
-    E = con / (charges[0, :] * (np.linalg.norm(con,axis=0)**3)[:,:,:,:])
-    E = np.sum(E,axis=4)
-    print("E", E.shape)
-#    for charge in charges:
- #       con =  gridMatrix - charge[:,None,None,None]
-  #      E  +=  con / ((charge[0] * np.linalg.norm(con,axis=0)**3)[None,:,:,:])
-    return E
-
-def distributionAnalysis(charges,n=512, r=2, dist=1):
+def distributionAnalysis(charges,n=512, rad=2, dist=1, tol=0.1):
     # generate grid
     print("generating grid")
-    p1 = np.linspace(-r, r, n)
-    p2 = np.linspace(-r, r, n)
-    p3 = np.linspace(-r, r, n)
+    r = np.linspace(0, rad, n)
+    x_1 = np.linspace(0, rad, n)
+    print(r.shape, x_1.shape)
 
-    print("generating field matrix")
-    gridMatrix = np.array(np.meshgrid(p1, p2, p3, indexing = 'ij'))
-    print("calculating field")
-    E = np.linalg.norm(_fieldProbe(charges, gridMatrix),axis=0)
-    print("E linalg", E.shape)
-    
-    print("evaluating sum")
+    grid_1, grid_2 = np.meshgrid(r, x_1)
+    grid = np.array((grid_1,grid_2,np.zeros(grid_1.shape)))
+
+    charges = charges.swapaxes(0,1)
+    con = np.subtract(grid[:,:,:,None], charges[:,None,None,:])
+    E = con / (charges[0, :] * (np.linalg.norm(con,axis=0)**3))
+    E = np.sum(E,axis=3)
+
+    E = np.linalg.norm(E, axis=0)
+
     cap_sum = 0
-    sum = E.sum()
-    print("sum", sum.shape)
+    sum = 0
 
-    for x_1 in range(0, n):
-        print(x_1)
-        if p1[x_1] < -dist or p1[x_1] > dist:
+    for b_ in range(0, n):
+        print(b_)
+        if np.abs(dist - x_1[b_]) > tol:
             continue
-        for x_2 in range(0, n):
-            if p2[x_2] > 1:
-                continue
-            for x_3 in range(0, n):
-                if np.hypot(p3[x_2], p3[x_3]) < 1:
-                    cap_sum += E[x_1][x_2][x_3]
+        for r_ in range(0, n):
+            sum += E[b_][r_]
+            if r[r_] < 1:
+                cap_sum += E[b_][r_]
+                
     print("total: ", sum)
     print("in capacitor", cap_sum)
     print("quotient", cap_sum / sum)
+    return sum, cap_sum
+
+def chunked(cap,n=resolution,rad=50, tol=0.01, dist=width, chunkxy=2):
+    xy = np.linspace(0,chunkxy, chunkxy)
+    xy * rad
+    print(xy)
+    #distributionAnalysis(cap,n=resolution,rad=50, tol=0.01, dist=width)
 
 
 
-#path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.05/Breite_1.0/cap.npy"
-#path = easygui.fileopenbox(default="/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund")
-#path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.02/Breite_1.0/cap.npy"
 cap = sim.load(path)
 
-distributionAnalysis(cap,n=resolution,r=4, dist=2)
+#chunked(cap)
+distributionAnalysis(cap,n=resolution,rad=40, tol=0.01, dist=width)
+
+    
 
 def oneAxisDistribution():
     space = np.linspace(-10,10, 10000)
