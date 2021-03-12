@@ -6,9 +6,9 @@ import easygui
 import matplotlib.pyplot as plt
 import sys
 
-path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.05/Breite_0.1/cap.npy"
+width = 1.0
+path = "/home/felix/Documents/Schule/Physik/Facharbeit/Research/Python/Simuliert/rund/0.05/Breite_{}/cap.npy".format(width)
 resolution = 200
-width = 0.1
 try:
     resolution = int(sys.argv[1])
 except:
@@ -39,7 +39,7 @@ def distributionAnalysis(charges,n=200, radr0=0, radb0=0, rad=2, dist=1, tol=0.1
     E = np.sum(E,axis=3)
 
     E = np.linalg.norm(E, axis=0)
-    
+
     E = E * r[None,:]
 
     cap_sum = 0
@@ -78,13 +78,13 @@ def chunked(cap,chunksize,rad=50, tol=0.1, dist=width, chunks=8):
 
 cap = sim.load(path)
 resolution = 200
-chunked(cap,chunksize=resolution,rad=10, tol=0.02, dist=width, chunks = 2)
+#chunked(cap,chunksize=resolution,rad=10, tol=0.005, dist=width, chunks = 2)
 #distributionAnalysis(cap,n=resolution,rad=25, tol=0.1, dist=width)
 
     
 
-def oneAxisDistribution():
-    space = np.linspace(-10,10, 10000)
+def oneAxisDistribution(limit, n, dist=1):
+    space = np.linspace(-limit, limit, n)
     spaceGrid = np.array([space, np.zeros(space.shape), np.zeros(space.shape)])
     
     charges = cap.swapaxes(0,1)
@@ -93,13 +93,19 @@ def oneAxisDistribution():
     con = np.subtract(spaceGrid[:,:,None], charges[:,None,:])
     print("con", con.shape)
     E = con / (charges[0, :] * (np.linalg.norm(con,axis=0)**3))
+    E *= dist # Ladung ausgleichen
+    E /= 4*np.pi*(8.85*10**-8)
     E = np.sum(E,axis=2)
     print("E", E.shape)
-    normE = np.linalg.norm(E, axis=0)
+
+    opt_E = len(cap)/(4*8.85*10**-8)
     
     fig = plt.figure()
     ax = fig.add_subplot(111)
     
-    ax.plot(space, normE, '-')
+    ax.plot(space, np.full(space.shape, opt_E), '-')
+    ax.plot(space, -E[0], '-', color='red')
     
     plt.show()
+
+oneAxisDistribution(4,10000, dist=width)
