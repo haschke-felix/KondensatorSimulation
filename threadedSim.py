@@ -59,7 +59,7 @@ class SimCore(object):
 
 def simStepThreaded(charges, step=0.4):
     procs = list()
-    n_cpus = (psutil.cpu_count() * 5) // 4
+    n_cpus = (psutil.cpu_count() * 4) // 5
     n = len(charges)
     n_step = n // n_cpus
 
