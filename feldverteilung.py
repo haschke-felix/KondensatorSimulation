@@ -89,17 +89,15 @@ def oneAxisDistribution(limit, n, dist=1):
     
     charges = cap.swapaxes(0,1)
     
-    print("spaceGrid", spaceGrid.shape)
     con = np.subtract(spaceGrid[:,:,None], charges[:,None,:])
-    print("con", con.shape)
     E = con / (charges[0, :] * (np.linalg.norm(con,axis=0)**3))
     E *= dist # Ladung ausgleichen
     E /= 4*np.pi*(8.85*10**-8)
     E = np.sum(E,axis=2)
-    print("E", E.shape)
 
+    # normale Kondensatorformel
     opt_E = len(cap)/(4*8.85*10**-8)
-    
+        
     fig = plt.figure()
     ax = fig.add_subplot(111)
     
