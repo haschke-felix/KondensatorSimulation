@@ -67,7 +67,7 @@ for i in range(len(widths)):
 
 #ax.plot(grid, np.full(grid.shape, 1), '--', color='black', label='Optimaler Kondensator')
 ax.set_xlabel('Radius $r$')
-ax.set_ylabel('Anteil der "optimalen" Arbeit (%)')
+ax.set_ylabel('Anteil der "idealen" Spannung (%)')
 ax.set_ylim(0, 110)
 plt.legend()
 plt.show()

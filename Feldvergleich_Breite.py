@@ -37,12 +37,12 @@ for i in range(len(caps)):
     print(i)
     E = oneAxisField(grid, caps[i], widths[i])
     #shape, color = colors[i]
-    ax.plot(grid, -E[0] / opt_E , '-',label="Abstand: {}".format(widths[i]*2))
+    ax.plot(grid, -E[0] / opt_E * 100, '-',label="Abstand: {}".format(widths[i]*2))
     
 
 
-ax.plot(grid, np.full(grid.shape, 1), '--', color='black', label='Optimaler Kondensator')
+ax.plot(grid, np.full(grid.shape, 100), '--', color='black', label='Optimaler Kondensator')
 ax.set_xlabel('$x_1$')
-ax.set_ylabel('Anteil der "optimalen" Feldstärke (%)')
+ax.set_ylabel('Anteil der "idealen" Feldstärke (%)')
 plt.legend()
 plt.show()
