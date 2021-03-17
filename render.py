@@ -22,9 +22,9 @@ cap = sim.load(path)
 
 #plt.printDistributionRingsChargesColored(cap)
 #plt.chargeOccurancePlot(cap,30)
-#plt.kernelDensityPlot(cap,h=1/40)
+plt.kernelDensityPlot(cap,h=1/50)
 #plt.compareDensity(cap1,cap2,h1=1/10,h2=1/10,label1="0,5",label2="1")
-plt.printStreamPlot(cap,256)
+#plt.printStreamPlot(cap,256)
 #plt.printDistribution(cap)
 
 #plt.strengthInMiddlePlot(cap)

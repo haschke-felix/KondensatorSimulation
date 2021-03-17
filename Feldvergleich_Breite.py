@@ -41,7 +41,7 @@ for i in range(len(caps)):
     
 
 
-ax.plot(grid, np.full(grid.shape, 100), '--', color='black', label='Optimaler Kondensator')
+ax.plot(grid, np.full(grid.shape, 100), '--', color='black', label='Idealer Kondensator')
 ax.set_xlabel('$x_1$')
 ax.set_ylabel('Anteil der "idealen" Feldstärke (%)')
 plt.legend()

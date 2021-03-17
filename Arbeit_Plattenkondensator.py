@@ -38,7 +38,7 @@ x_2_pos = np.linspace(0,1,100)
 opt_E = len(caps[0])/(4*8.85*10**-8) / 2
 
 # print opt
-ax.plot(x_2_pos, np.full(x_2_pos.shape, 100), '--', color='black',label='Optimaler Kondensator')
+ax.plot(x_2_pos, np.full(x_2_pos.shape, 100), '--', color='black',label='Idealer Kondensator')
 
 
 def workSingleCap(cap, width):
